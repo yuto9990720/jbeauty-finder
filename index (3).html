@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>J-Beauty Finder | Find Your Perfect Japanese Cosmetics</title>
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;500;600&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --cream:#faf7f2;
+  --blush:#f2ddd5;
+  --sakura:#e8a4a0;
+  --deep:#2d1f1a;
+  --text:#3d2e28;
+  --muted:#9a8078;
+  --gold:#c9a96e;
+  --white:#ffffff;
+  --card-bg:rgba(255,255,255,0.85);
+}
+body{
+  font-family:'DM Sans',sans-serif;
+  background:var(--cream);
+  color:var(--text);
+  min-height:100vh;
+  position:relative;
+  overflow-x:hidden;
+}
+body::before{
+  content:'';
+  position:fixed;inset:0;
+  background:
+    radial-gradient(ellipse 60% 50% at 80% 10%, rgba(232,164,160,0.25) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 60% at 10% 80%, rgba(201,169,110,0.15) 0%, transparent 60%),
+    radial-gradient(ellipse 40% 40% at 50% 50%, rgba(242,221,213,0.3) 0%, transparent 70%);
+  pointer-events:none;z-index:0;
+}
+.app{max-width:720px;margin:0 auto;padding:32px 20px 60px;position:relative;z-index:1}
+.header{text-align:center;margin-bottom:48px}
+.header-tag{display:inline-block;font-size:11px;letter-spacing:0.15em;text-transform:uppercase;color:var(--muted);border:0.5px solid var(--sakura);padding:4px 14px;border-radius:20px;margin-bottom:16px;}
+.header h1{font-family:'Shippori Mincho',serif;font-size:clamp(28px,5vw,42px);font-weight:500;color:var(--deep);line-height:1.2;margin-bottom:8px;}
+.header h1 span{color:var(--sakura)}
+.header p{font-size:14px;color:var(--muted);line-height:1.6}
+.lang-row{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-bottom:40px;}
+.lang-btn{padding:6px 16px;border-radius:20px;border:0.5px solid rgba(45,31,26,0.2);background:transparent;cursor:pointer;font-size:12px;font-family:'DM Sans',sans-serif;color:var(--muted);transition:all 0.2s;}
+.lang-btn.active,.lang-btn:hover{background:var(--deep);color:var(--white);border-color:var(--deep);}
+.step{display:none;animation:fadeUp 0.4s ease}
+.step.active{display:block}
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+.progress-wrap{margin-bottom:32px}
+.progress-label{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-bottom:8px;letter-spacing:0.05em;}
+.progress-bar{height:2px;background:rgba(45,31,26,0.1);border-radius:2px;overflow:hidden}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--sakura),var(--gold));border-radius:2px;transition:width 0.5s ease}
+.q-card{background:var(--card-bg);backdrop-filter:blur(12px);border:0.5px solid rgba(232,164,160,0.3);border-radius:20px;padding:32px;margin-bottom:20px;}
+.q-label{font-size:11px;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:12px}
+.q-text{font-family:'Shippori Mincho',serif;font-size:clamp(18px,3vw,24px);font-weight:500;color:var(--deep);line-height:1.4;margin-bottom:24px;}
+.options{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px}
+.opt{padding:14px 16px;border-radius:14px;border:0.5px solid rgba(45,31,26,0.15);background:rgba(255,255,255,0.6);cursor:pointer;font-size:13px;color:var(--text);transition:all 0.2s;text-align:center;line-height:1.4;}
+.opt:hover{background:var(--blush);border-color:var(--sakura);transform:translateY(-1px)}
+.opt.selected{background:var(--deep);color:var(--white);border-color:var(--deep)}
+.opt-emoji{display:block;font-size:22px;margin-bottom:6px}
+.nav{display:flex;gap:12px;justify-content:flex-end;margin-top:16px}
+.btn-back{padding:10px 20px;border-radius:12px;border:0.5px solid rgba(45,31,26,0.2);background:transparent;cursor:pointer;font-size:13px;font-family:'DM Sans',sans-serif;color:var(--muted);transition:all 0.2s;}
+.btn-back:hover{background:rgba(45,31,26,0.05)}
+.btn-next{padding:10px 24px;border-radius:12px;border:none;background:var(--deep);color:var(--white);cursor:pointer;font-size:13px;font-family:'DM Sans',sans-serif;transition:all 0.2s;}
+.btn-next:hover{background:var(--sakura);transform:translateY(-1px)}
+.btn-next:disabled{opacity:0.3;cursor:not-allowed;transform:none}
+.loading-wrap{text-align:center;padding:48px 0}
+.sakura-loader{width:48px;height:48px;margin:0 auto 20px;border:2px solid var(--blush);border-top-color:var(--sakura);border-radius:50%;animation:spin 1s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-text{font-family:'Shippori Mincho',serif;font-size:18px;color:var(--deep);margin-bottom:8px}
+.loading-sub{font-size:13px;color:var(--muted)}
+.result-header{text-align:center;margin-bottom:32px}
+.result-title{font-family:'Shippori Mincho',serif;font-size:clamp(22px,4vw,32px);color:var(--deep);margin-bottom:8px;}
+.skin-badge{display:inline-block;padding:6px 20px;border-radius:20px;background:linear-gradient(135deg,var(--blush),rgba(201,169,110,0.2));border:0.5px solid var(--sakura);font-size:13px;color:var(--deep);margin-bottom:16px;}
+.result-intro{font-size:14px;color:var(--muted);line-height:1.7;max-width:500px;margin:0 auto}
+.products-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px;margin-bottom:28px}
+.product-card{background:var(--card-bg);backdrop-filter:blur(12px);border:0.5px solid rgba(232,164,160,0.25);border-radius:18px;padding:20px;transition:all 0.25s;cursor:pointer;}
+.product-card:hover{transform:translateY(-3px);border-color:var(--sakura);box-shadow:0 8px 32px rgba(232,164,160,0.2)}
+.prod-brand{font-size:10px;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);margin-bottom:4px}
+.prod-name{font-family:'Shippori Mincho',serif;font-size:16px;color:var(--deep);margin-bottom:8px;line-height:1.3}
+.prod-desc{font-size:12px;color:var(--muted);line-height:1.6;margin-bottom:12px}
+.prod-tags{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:12px}
+.prod-tag{font-size:10px;padding:2px 8px;border-radius:10px;background:var(--blush);color:var(--sakura)}
+.prod-price{font-size:14px;font-weight:500;color:var(--deep);margin-bottom:12px}
+.prod-link{display:block;width:100%;padding:8px;text-align:center;border-radius:10px;background:var(--deep);color:var(--white);font-size:12px;text-decoration:none;transition:all 0.2s;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;}
+.prod-link:hover{background:var(--sakura)}
+.ai-section{background:var(--card-bg);backdrop-filter:blur(12px);border:0.5px solid rgba(201,169,110,0.3);border-radius:20px;padding:28px;margin-top:24px;}
+.ai-label{display:flex;align-items:center;gap:8px;font-size:11px;letter-spacing:0.1em;color:var(--gold);text-transform:uppercase;margin-bottom:16px;}
+.ai-dot{width:6px;height:6px;border-radius:50%;background:var(--gold);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
+.ai-response{font-size:14px;color:var(--text);line-height:1.8}
+.ask-wrap{margin-top:20px;display:flex;gap:10px}
+.ask-input{flex:1;padding:12px 16px;border-radius:12px;border:0.5px solid rgba(45,31,26,0.2);background:rgba(255,255,255,0.7);font-size:13px;font-family:'DM Sans',sans-serif;color:var(--text);outline:none;}
+.ask-input:focus{border-color:var(--sakura)}
+.ask-btn{padding:12px 20px;border-radius:12px;border:none;background:var(--deep);color:var(--white);cursor:pointer;font-size:13px;font-family:'DM Sans',sans-serif;transition:all 0.2s;white-space:nowrap;}
+.ask-btn:hover{background:var(--sakura)}
+.restart-btn{display:block;margin:32px auto 0;padding:12px 32px;border-radius:12px;border:0.5px solid rgba(45,31,26,0.2);background:transparent;cursor:pointer;font-size:13px;font-family:'DM Sans',sans-serif;color:var(--muted);}
+.restart-btn:hover{background:var(--blush)}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <div class="header-tag">J-Beauty Finder</div>
+    <h1>Find Your Perfect<br><span>Japanese Cosmetics</span></h1>
+    <p id="header-sub">Answer 5 quick questions to get personalized recommendations</p>
+  </div>
+  <div class="lang-row" id="lang-row">
+    <button class="lang-btn active" onclick="setLang('en')">🇺🇸 English</button>
+    <button class="lang-btn" onclick="setLang('zh')">🇨🇳 中文</button>
+    <button class="lang-btn" onclick="setLang('ko')">🇰🇷 한국어</button>
+    <button class="lang-btn" onclick="setLang('fr')">🇫🇷 Français</button>
+    <button class="lang-btn" onclick="setLang('es')">🇪🇸 Español</button>
+    <button class="lang-btn" onclick="setLang('th')">🇹🇭 ภาษาไทย</button>
+    <button class="lang-btn" onclick="setLang('ar')">🇸🇦 العربية</button>
+  </div>
+  <div id="quiz">
+    <div class="progress-wrap">
+      <div class="progress-label"><span id="step-label">Step 1 of 5</span><span id="step-pct">20%</span></div>
+      <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:20%"></div></div>
+    </div>
+    <div class="step active" id="step-1">
+      <div class="q-card">
+        <div class="q-label">Skin Type</div>
+        <div class="q-text" id="q-text-1">How would you describe your skin?</div>
+        <div class="options">
+          <div class="opt" onclick="select(1,this,'dry')"><span class="opt-emoji">🏜️</span><span id="o1-1">Dry</span></div>
+          <div class="opt" onclick="select(1,this,'oily')"><span class="opt-emoji">✨</span><span id="o1-2">Oily</span></div>
+          <div class="opt" onclick="select(1,this,'combination')"><span class="opt-emoji">☯️</span><span id="o1-3">Combination</span></div>
+          <div class="opt" onclick="select(1,this,'sensitive')"><span class="opt-emoji">🌸</span><span id="o1-4">Sensitive</span></div>
+          <div class="opt" onclick="select(1,this,'normal')"><span class="opt-emoji">💫</span><span id="o1-5">Normal</span></div>
+        </div>
+      </div>
+      <div class="nav"><button class="btn-next" id="next-1" onclick="nextStep(1)" disabled>Next →</button></div>
+    </div>
+    <div class="step" id="step-2">
+      <div class="q-card">
+        <div class="q-label">Skin Concern</div>
+        <div class="q-text" id="q-text-2">What's your main skin concern?</div>
+        <div class="options">
+          <div class="opt" onclick="select(2,this,'brightening')"><span class="opt-emoji">☀️</span><span id="o2-1">Brightening</span></div>
+          <div class="opt" onclick="select(2,this,'anti-aging')"><span class="opt-emoji">⏳</span><span id="o2-2">Anti-aging</span></div>
+          <div class="opt" onclick="select(2,this,'hydration')"><span class="opt-emoji">💧</span><span id="o2-3">Hydration</span></div>
+          <div class="opt" onclick="select(2,this,'pores')"><span class="opt-emoji">🔬</span><span id="o2-4">Pores</span></div>
+          <div class="opt" onclick="select(2,this,'acne')"><span class="opt-emoji">🎯</span><span id="o2-5">Acne</span></div>
+          <div class="opt" onclick="select(2,this,'pigmentation')"><span class="opt-emoji">🌗</span><span id="o2-6">Pigmentation</span></div>
+        </div>
+      </div>
+      <div class="nav">
+        <button class="btn-back" onclick="prevStep(2)">← Back</button>
+        <button class="btn-next" id="next-2" onclick="nextStep(2)" disabled>Next →</button>
+      </div>
+    </div>
+    <div class="step" id="step-3">
+      <div class="q-card">
+        <div class="q-label">Texture Preference</div>
+        <div class="q-text" id="q-text-3">What texture do you prefer?</div>
+        <div class="options">
+          <div class="opt" onclick="select(3,this,'lightweight')"><span class="opt-emoji">🪶</span><span id="o3-1">Lightweight / Watery</span></div>
+          <div class="opt" onclick="select(3,this,'cream')"><span class="opt-emoji">🍦</span><span id="o3-2">Rich cream</span></div>
+          <div class="opt" onclick="select(3,this,'gel')"><span class="opt-emoji">💎</span><span id="o3-3">Gel / Jelly</span></div>
+          <div class="opt" onclick="select(3,this,'oil')"><span class="opt-emoji">🫧</span><span id="o3-4">Oil / Serum</span></div>
+        </div>
+      </div>
+      <div class="nav">
+        <button class="btn-back" onclick="prevStep(3)">← Back</button>
+        <button class="btn-next" id="next-3" onclick="nextStep(3)" disabled>Next →</button>
+      </div>
+    </div>
+    <div class="step" id="step-4">
+      <div class="q-card">
+        <div class="q-label">Budget</div>
+        <div class="q-text" id="q-text-4">What's your budget per product?</div>
+        <div class="options">
+          <div class="opt" onclick="select(4,this,'budget')"><span class="opt-emoji">💴</span><span id="o4-1">Under ¥2,000</span></div>
+          <div class="opt" onclick="select(4,this,'mid')"><span class="opt-emoji">💰</span><span id="o4-2">¥2,000–¥6,000</span></div>
+          <div class="opt" onclick="select(4,this,'premium')"><span class="opt-emoji">👑</span><span id="o4-3">¥6,000+</span></div>
+        </div>
+      </div>
+      <div class="nav">
+        <button class="btn-back" onclick="prevStep(4)">← Back</button>
+        <button class="btn-next" id="next-4" onclick="nextStep(4)" disabled>Next →</button>
+      </div>
+    </div>
+    <div class="step" id="step-5">
+      <div class="q-card">
+        <div class="q-label">Lifestyle</div>
+        <div class="q-text" id="q-text-5">How do you usually shop?</div>
+        <div class="options">
+          <div class="opt" onclick="select(5,this,'inbound')"><span class="opt-emoji">✈️</span><span id="o5-1">Visiting Japan now</span></div>
+          <div class="opt" onclick="select(5,this,'online')"><span class="opt-emoji">📦</span><span id="o5-2">Online delivery</span></div>
+          <div class="opt" onclick="select(5,this,'both')"><span class="opt-emoji">🌏</span><span id="o5-3">Both</span></div>
+        </div>
+      </div>
+      <div class="nav">
+        <button class="btn-back" onclick="prevStep(5)">← Back</button>
+        <button class="btn-next" id="next-5" onclick="getRecommendations()" disabled>Get My Recommendations ✨</button>
+      </div>
+    </div>
+    <div class="step" id="step-loading">
+      <div class="loading-wrap">
+        <div class="sakura-loader"></div>
+        <div class="loading-text" id="loading-text">Analyzing your skin profile...</div>
+        <div class="loading-sub" id="loading-sub">Finding the best Japanese cosmetics for you</div>
+      </div>
+    </div>
+    <div class="step" id="step-results">
+      <div class="result-header">
+        <div class="skin-badge" id="skin-badge">✨ Your Profile</div>
+        <div class="result-title" id="result-title">Your J-Beauty Picks</div>
+        <p class="result-intro" id="result-intro"></p>
+      </div>
+      <div class="products-grid" id="products-grid"></div>
+      <div class="ai-section">
+        <div class="ai-label"><div class="ai-dot"></div><span id="ai-label-text">AI Beauty Advisor</span></div>
+        <div class="ai-response" id="ai-response"></div>
+        <div class="ask-wrap">
+          <input class="ask-input" id="ask-input" placeholder="Ask anything about these products..." />
+          <button class="ask-btn" onclick="askQuestion()" id="ask-btn">Ask ↗</button>
+        </div>
+      </div>
+      <button class="restart-btn" onclick="restart()" id="restart-btn">↺ Start over</button>
+    </div>
+  </div>
+</div>
+<script>
+const answers={};let currentLang='en';
+const i18n={en:{headerSub:"Answer 5 quick questions to get personalized recommendations",stepOf:(c,t)=>`Step ${c} of ${t}`,loading:"Analyzing your skin profile...",loadingSub:"Finding the best Japanese cosmetics for you",aiLabel:"AI Beauty Advisor",askPlaceholder:"Ask anything about these products...",askBtn:"Ask ↗",restart:"↺ Start over",buyBtn:"Buy Now →"},zh:{headerSub:"回答5个问题，获取个性化推荐",stepOf:(c,t)=>`第${c}步 / 共${t}步`,loading:"正在分析您的肤质...",loadingSub:"为您寻找最适合的日本化妆品",aiLabel:"AI美容顾问",askPlaceholder:"询问有关这些产品的任何问题...",askBtn:"提问 ↗",restart:"↺ 重新开始",buyBtn:"立即购买 →"},ko:{headerSub:"5가지 질문으로 맞춤 추천을 받으세요",stepOf:(c,t)=>`${c} / ${t} 단계`,loading:"피부 타입 분석 중...",loadingSub:"나에게 맞는 일본 화장품을 찾고 있어요",aiLabel:"AI 뷰티 어드바이저",askPlaceholder:"제품에 대해 무엇이든 물어보세요...",askBtn:"질문 ↗",restart:"↺ 다시 시작",buyBtn:"지금 구매 →"},fr:{headerSub:"Répondez à 5 questions pour des recommandations personnalisées",stepOf:(c,t)=>`Étape ${c} sur ${t}`,loading:"Analyse de votre profil cutané...",loadingSub:"Recherche des meilleurs cosmétiques japonais pour vous",aiLabel:"Conseillère beauté IA",askPlaceholder:"Posez vos questions sur ces produits...",askBtn:"Demander ↗",restart:"↺ Recommencer",buyBtn:"Acheter →"},es:{headerSub:"Responde 5 preguntas para recomendaciones personalizadas",stepOf:(c,t)=>`Paso ${c} de ${t}`,loading:"Analizando tu perfil de piel...",loadingSub:"Encontrando los mejores cosméticos japoneses para ti",aiLabel:"Asesora de belleza IA",askPlaceholder:"Pregunta lo que quieras sobre estos productos...",askBtn:"Preguntar ↗",restart:"↺ Empezar de nuevo",buyBtn:"Comprar →"},th:{headerSub:"ตอบ 5 คำถามเพื่อรับคำแนะนำที่เหมาะกับคุณ",stepOf:(c,t)=>`ขั้นตอน ${c} จาก ${t}`,loading:"กำลังวิเคราะห์ผิวของคุณ...",loadingSub:"กำลังค้นหาเครื่องสำอางญี่ปุ่นที่เหมาะสมกับคุณ",aiLabel:"ที่ปรึกษาความงาม AI",askPlaceholder:"ถามอะไรก็ได้เกี่ยวกับผลิตภัณฑ์เหล่านี้...",askBtn:"ถาม ↗",restart:"↺ เริ่มใหม่",buyBtn:"ซื้อเลย →"},ar:{headerSub:"أجب على 5 أسئلة للحصول على توصيات شخصية",stepOf:(c,t)=>`الخطوة ${c} من ${t}`,loading:"تحليل ملف بشرتك...",loadingSub:"البحث عن أفضل مستحضرات التجميل اليابانية لك",aiLabel:"مستشارة الجمال الذكية",askPlaceholder:"اسأل أي شيء عن هذه المنتجات...",askBtn:"اسأل ↗",restart:"↺ ابدأ من جديد",buyBtn:"اشترِ الآن →"}};
+function setLang(lang){currentLang=lang;document.querySelectorAll('.lang-btn').forEach(b=>b.classList.remove('active'));event.target.classList.add('active');const t=i18n[lang]||i18n.en;document.getElementById('header-sub').textContent=t.headerSub;document.getElementById('ask-input').placeholder=t.askPlaceholder;document.getElementById('ask-btn').textContent=t.askBtn;}
+function select(step,el,value){document.querySelectorAll(`#step-${step} .opt`).forEach(o=>o.classList.remove('selected'));el.classList.add('selected');answers[step]=value;const nb=document.getElementById(`next-${step}`);if(nb)nb.disabled=false;}
+function showStep(id){document.querySelectorAll('.step').forEach(s=>s.classList.remove('active'));document.getElementById(`step-${id}`).classList.add('active');const total=5;if(typeof id==='number'&&id<=total){const pct=Math.round((id/total)*100);document.getElementById('progress-fill').style.width=pct+'%';const t=i18n[currentLang]||i18n.en;document.getElementById('step-label').textContent=t.stepOf(id,total);document.getElementById('step-pct').textContent=pct+'%';}}
+function nextStep(current){if(!answers[current])return;showStep(current+1);}
+function prevStep(current){showStep(current-1);}
+async function getRecommendations(){if(!answers[5])return;document.querySelector('.progress-wrap').style.display='none';showStep('loading');const t=i18n[currentLang]||i18n.en;document.getElementById('loading-text').textContent=t.loading;document.getElementById('loading-sub').textContent=t.loadingSub;const langNames={en:'English',zh:'Chinese (Simplified)',ko:'Korean',fr:'French',es:'Spanish',th:'Thai',ar:'Arabic'};const outputLang=langNames[currentLang]||'English';const prompt=`You are a J-Beauty expert. A customer has completed a skin quiz:\n- Skin type: ${answers[1]}\n- Main concern: ${answers[2]}\n- Texture preference: ${answers[3]}\n- Budget: ${answers[4]}\n- Shopping: ${answers[5]}\n\nRespond ONLY in ${outputLang}. Return a JSON object (no markdown, no extra text) with this exact structure:\n{\n  "skinProfile": "2-3 word skin profile label",\n  "intro": "2 sentence personalized intro",\n  "advice": "3-4 sentences of expert beauty advice",\n  "products": [\n    {\n      "brand": "brand name",\n      "name": "product name",\n      "desc": "1 sentence description",\n      "tags": ["tag1","tag2"],\n      "price": "price in JPY",\n      "affiliate": "https://www.amazon.co.jp/s?k=brand+product",\n      "reason": "why this suits their profile"\n    }\n  ]\n}\nRecommend exactly 4 real Japanese cosmetics. All text must be in ${outputLang}.`;
+try{const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1500,messages:[{role:'user',content:prompt}]})});const data=await res.json();const raw=data.content.find(b=>b.type==='text')?.text||'';const jsonMatch=raw.match(/\{[\s\S]*\}/);if(!jsonMatch)throw new Error('No JSON');const result=JSON.parse(jsonMatch[0]);renderResults(result);}catch(e){renderFallback();}}
+function renderResults(data){const t=i18n[currentLang]||i18n.en;document.getElementById('skin-badge').textContent='✨ '+data.skinProfile;document.getElementById('result-title').textContent=data.skinProfile;document.getElementById('result-intro').textContent=data.intro;document.getElementById('ai-response').textContent=data.advice;document.getElementById('ai-label-text').textContent=t.aiLabel;document.getElementById('ask-btn').textContent=t.askBtn;document.getElementById('ask-input').placeholder=t.askPlaceholder;document.getElementById('restart-btn').textContent=t.restart;const grid=document.getElementById('products-grid');grid.innerHTML='';(data.products||[]).forEach(p=>{const card=document.createElement('div');card.className='product-card';card.innerHTML=`<div class="prod-brand">${p.brand}</div><div class="prod-name">${p.name}</div><div class="prod-desc">${p.desc}</div><div class="prod-tags">${(p.tags||[]).map(tag=>`<span class="prod-tag">${tag}</span>`).join('')}</div><div class="prod-price">${p.price}</div><a class="prod-link" href="${p.affiliate}" target="_blank">${t.buyBtn}</a>`;grid.appendChild(card);});showStep('results');}
+function renderFallback(){const t=i18n[currentLang]||i18n.en;const fp=[{brand:'Hada Labo',name:'Gokujyun Lotion',desc:'Ultra-hydrating hyaluronic acid toner beloved across Asia.',tags:['Hydrating','Fragrance-free'],price:'¥880',affiliate:'https://a.r10.to/hgGDde'},{brand:'Shiseido',name:'Ultimune Concentrate',desc:'Iconic Japanese serum that strengthens skin defenses.',tags:['Anti-aging','Brightening'],price:'¥9,680',affiliate:'https://a.r10.to/hPSQsS'},{brand:'FANCL',name:'Mild Cleansing Oil',desc:'Japan\'s best-selling gentle oil cleanser, preservative-free.',tags:['Sensitive','Cleansing'],price:'¥1,980',affiliate:'https://a.r10.to/h8F7Yt'},{brand:'SK-II',name:'Facial Treatment Essence',desc:'The legendary Pitera essence for luminous skin.',tags:['Premium','Brightening'],price:'¥22,000',affiliate:'https://a.r10.to/hPSQbO'}];document.getElementById('skin-badge').textContent='✨ Your Profile';document.getElementById('result-title').textContent='J-Beauty Picks For You';document.getElementById('result-intro').textContent='Curated Japanese cosmetics based on your skin profile.';document.getElementById('ai-response').textContent='Japanese beauty philosophy focuses on deep hydration, gentle formulations, and long-term skin health. These picks are highly rated among international visitors to Japan.';document.getElementById('ai-label-text').textContent=t.aiLabel;document.getElementById('ask-btn').textContent=t.askBtn;document.getElementById('ask-input').placeholder=t.askPlaceholder;document.getElementById('restart-btn').textContent=t.restart;const grid=document.getElementById('products-grid');grid.innerHTML='';fp.forEach(p=>{const card=document.createElement('div');card.className='product-card';card.innerHTML=`<div class="prod-brand">${p.brand}</div><div class="prod-name">${p.name}</div><div class="prod-desc">${p.desc}</div><div class="prod-tags">${p.tags.map(tag=>`<span class="prod-tag">${tag}</span>`).join('')}</div><div class="prod-price">${p.price}</div><a class="prod-link" href="${p.affiliate}" target="_blank">${t.buyBtn}</a>`;grid.appendChild(card);});showStep('results');}
+async function askQuestion(){const input=document.getElementById('ask-input');const question=input.value.trim();if(!question)return;input.value='';const responseEl=document.getElementById('ai-response');const btn=document.getElementById('ask-btn');btn.disabled=true;responseEl.textContent='...';const langNames={en:'English',zh:'Chinese (Simplified)',ko:'Korean',fr:'French',es:'Spanish',th:'Thai',ar:'Arabic'};const outputLang=langNames[currentLang]||'English';try{const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:600,messages:[{role:'user',content:`You are a J-Beauty expert. Answer in ${outputLang} only. Keep it under 4 sentences. Question: ${question}`}]})});const data=await res.json();responseEl.textContent=data.content.find(b=>b.type==='text')?.text||'Unable to answer right now.';}catch(e){responseEl.textContent='Please try again.';}btn.disabled=false;}
+document.getElementById('ask-input').addEventListener('keydown',e=>{if(e.key==='Enter')askQuestion();});
+function restart(){Object.keys(answers).forEach(k=>delete answers[k]);document.querySelectorAll('.opt').forEach(o=>o.classList.remove('selected'));document.querySelectorAll('.btn-next').forEach(b=>b.disabled=true);document.querySelector('.progress-wrap').style.display='block';showStep(1);}
+</script>
+</body>
+</html>
