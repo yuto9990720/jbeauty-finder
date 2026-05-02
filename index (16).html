@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>J-Beauty Finder | Your Perfect Japanese Skincare</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Jost:wght@200;300;400;500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--ivory:#fdf9f4;--petal:#f5e6e0;--blush:#e8c4b8;--rose:#c9776a;--deep:#1a0f0c;--umber:#4a2e26;--text:#2d1f1a;--muted:#9a8078;--gold:#b8924a;--gold-light:#e8d5a8;--white:#ffffff;--glass:rgba(255,255,255,0.7)}
+html{scroll-behavior:smooth}
+body{font-family:'Jost',sans-serif;background:var(--ivory);color:var(--text);min-height:100vh;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;background:linear-gradient(160deg,rgba(255,240,245,0.97) 0%,rgba(253,249,244,0.95) 50%,rgba(255,243,240,0.97) 100%);pointer-events:none;z-index:0}
+#sakura-canvas{position:fixed;inset:0;pointer-events:none;z-index:0;opacity:0.55}
+.app{max-width:780px;margin:0 auto;padding:48px 24px 80px;position:relative;z-index:1}
+.header{text-align:center;margin-bottom:56px;position:relative}
+.header-eyebrow{display:flex;align-items:center;justify-content:center;gap:12px;margin-bottom:20px}
+.eyebrow-line{height:0.5px;width:40px;background:linear-gradient(90deg,transparent,var(--gold))}
+.eyebrow-line.right{background:linear-gradient(90deg,var(--gold),transparent)}
+.eyebrow-text{font-size:10px;letter-spacing:0.25em;text-transform:uppercase;color:var(--gold);font-weight:400}
+.header h1{font-family:'Cormorant Garamond',serif;font-size:clamp(36px,6vw,64px);font-weight:300;color:var(--deep);line-height:1.1;margin-bottom:6px}
+.header h1 em{font-style:italic;color:var(--rose)}
+.header-sub{font-size:13px;color:var(--muted);letter-spacing:0.06em;font-weight:300;margin-bottom:28px}
+.header-bloom{width:1px;height:40px;background:linear-gradient(180deg,var(--blush),transparent);margin:0 auto}
+.lang-row{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-bottom:48px}
+.lang-btn{padding:5px 14px;border-radius:2px;border:0.5px solid rgba(74,46,38,0.2);background:transparent;cursor:pointer;font-size:11px;font-family:'Jost',sans-serif;color:var(--muted);letter-spacing:0.08em;transition:all 0.3s;font-weight:300}
+.lang-btn:hover,.lang-btn.active{background:var(--deep);color:var(--ivory);border-color:var(--deep)}
+.progress-wrap{margin-bottom:40px}
+.progress-meta{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.progress-step{font-size:10px;letter-spacing:0.15em;text-transform:uppercase;color:var(--muted)}
+.progress-pct{font-family:'Cormorant Garamond',serif;font-size:22px;color:var(--rose);font-weight:300}
+.progress-bar{height:1px;background:rgba(74,46,38,0.1);position:relative}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--rose),var(--gold));transition:width 0.6s cubic-bezier(0.4,0,0.2,1)}
+.step{display:none;animation:reveal 0.5s ease}
+.step.active{display:block}
+@keyframes reveal{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+.q-card{background:var(--glass);backdrop-filter:blur(20px);border:0.5px solid rgba(200,119,106,0.2);border-radius:2px;padding:40px 36px;margin-bottom:20px;position:relative;overflow:hidden}
+.q-card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--rose),var(--gold),transparent)}
+.q-num{font-family:'Cormorant Garamond',serif;font-size:72px;font-weight:300;color:rgba(200,119,106,0.08);position:absolute;top:-10px;right:20px;line-height:1;pointer-events:none}
+.q-label{font-size:9px;letter-spacing:0.2em;text-transform:uppercase;color:var(--gold);margin-bottom:14px;font-weight:400}
+.q-text{font-family:'Cormorant Garamond',serif;font-size:clamp(22px,3.5vw,30px);font-weight:300;color:var(--deep);line-height:1.3;margin-bottom:28px}
+.options{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px}
+.opt{padding:16px 14px;border-radius:2px;border:0.5px solid rgba(74,46,38,0.12);background:rgba(255,255,255,0.5);cursor:pointer;font-size:12px;color:var(--umber);transition:all 0.25s;text-align:center;line-height:1.4;letter-spacing:0.03em;font-family:'Jost',sans-serif;font-weight:300}
+.opt:hover{background:var(--petal);border-color:var(--blush);transform:translateY(-2px)}
+.opt.selected{background:var(--deep);color:var(--ivory);border-color:var(--deep)}
+.opt-emoji{display:block;width:36px;height:36px;margin:0 auto 10px;opacity:0.7}
+.opt.selected .opt-emoji{opacity:1}
+.opt-emoji svg{width:100%;height:100%}
+.nav{display:flex;gap:10px;justify-content:flex-end;margin-top:16px}
+.btn-back{padding:10px 22px;border-radius:2px;border:0.5px solid rgba(74,46,38,0.2);background:transparent;cursor:pointer;font-size:11px;font-family:'Jost',sans-serif;color:var(--muted);letter-spacing:0.1em;transition:all 0.2s;font-weight:300}
+.btn-next{padding:10px 28px;border-radius:2px;border:none;background:var(--deep);color:var(--ivory);cursor:pointer;font-size:11px;font-family:'Jost',sans-serif;letter-spacing:0.12em;font-weight:400;transition:all 0.3s;text-transform:uppercase}
+.btn-next:hover{background:var(--rose)}
+.btn-next:disabled{opacity:0.25;cursor:not-allowed}
+.loading-wrap{text-align:center;padding:60px 0}
+.petal-loader{width:60px;height:60px;margin:0 auto 28px;position:relative}
+.petal-loader::before,.petal-loader::after{content:'🌸';position:absolute;font-size:28px;animation:petalSpin 2s linear infinite}
+.petal-loader::after{animation-delay:-1s;font-size:20px;top:8px;left:10px}
+@keyframes petalSpin{to{transform:rotate(360deg)}}
+.loading-text{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:300;color:var(--deep);margin-bottom:8px}
+.loading-sub{font-size:12px;color:var(--muted);letter-spacing:0.08em}
+.result-header{text-align:center;margin-bottom:40px}
+.result-eyebrow{display:flex;align-items:center;justify-content:center;gap:12px;margin-bottom:16px}
+.result-badge{display:inline-block;padding:6px 22px;border:0.5px solid var(--gold);font-size:10px;letter-spacing:0.2em;text-transform:uppercase;color:var(--gold);font-weight:400;background:rgba(184,146,74,0.06)}
+.result-title{font-family:'Cormorant Garamond',serif;font-size:clamp(28px,5vw,44px);font-weight:300;color:var(--deep);line-height:1.2;margin-bottom:12px}
+.result-intro{font-size:13px;color:var(--muted);line-height:1.8;max-width:480px;margin:0 auto}
+.products-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px;margin-bottom:32px}
+.product-card{background:var(--glass);backdrop-filter:blur(20px);border:0.5px solid rgba(200,119,106,0.15);border-radius:2px;overflow:hidden;transition:all 0.3s cubic-bezier(0.4,0,0.2,1);position:relative}
+.product-card:hover{transform:translateY(-4px);border-color:var(--rose);box-shadow:0 12px 48px rgba(200,119,106,0.15)}
+.prod-img-wrap{width:100%;height:180px;background:linear-gradient(135deg,var(--petal),var(--ivory));display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}
+.prod-img{width:100%;height:100%;object-fit:cover;transition:transform 0.4s ease}
+.product-card:hover .prod-img{transform:scale(1.04)}
+.prod-img-placeholder{font-size:48px;opacity:0.4}
+.prod-info{padding:18px}
+.prod-brand{font-size:9px;letter-spacing:0.2em;text-transform:uppercase;color:var(--gold);margin-bottom:4px;font-weight:400}
+.prod-name{font-family:'Cormorant Garamond',serif;font-size:18px;font-weight:400;color:var(--deep);margin-bottom:8px;line-height:1.2}
+.prod-desc{font-size:11px;color:var(--muted);line-height:1.7;margin-bottom:10px;font-weight:300}
+.prod-tags{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:12px}
+.prod-tag{font-size:9px;padding:2px 8px;border:0.5px solid var(--blush);color:var(--rose);letter-spacing:0.08em;text-transform:uppercase;border-radius:1px}
+.rakuten-badge{display:inline-block;font-size:9px;padding:2px 6px;background:#bf0000;color:#fff;border-radius:2px;letter-spacing:0.05em;margin-left:4px;vertical-align:middle}
+.prod-footer{display:flex;flex-direction:column;gap:4px}
+.prod-price{font-family:'Cormorant Garamond',serif;font-size:17px;color:var(--deep);font-weight:300;line-height:1.4}
+.prod-link{padding:8px 16px;border-radius:1px;background:var(--deep);color:var(--ivory);font-size:10px;text-decoration:none;letter-spacing:0.12em;text-transform:uppercase;transition:all 0.2s;border:none;cursor:pointer;font-family:'Jost',sans-serif;font-weight:400;white-space:nowrap}
+.prod-link:hover{background:var(--rose)}
+.ai-section{background:var(--glass);backdrop-filter:blur(20px);border:0.5px solid rgba(184,146,74,0.2);border-radius:2px;padding:32px;margin-top:28px;position:relative;overflow:hidden}
+.ai-section::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--gold),transparent)}
+.ai-header{display:flex;align-items:center;gap:10px;margin-bottom:20px}
+.ai-dot{width:5px;height:5px;border-radius:50%;background:var(--gold);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.4;transform:scale(0.8)}}
+.ai-label-text{font-size:9px;letter-spacing:0.2em;text-transform:uppercase;color:var(--gold)}
+.ai-response{font-size:13px;color:var(--text);line-height:1.9;font-weight:300}
+.ask-wrap{margin-top:20px;display:flex;gap:8px}
+.ask-input{flex:1;padding:12px 16px;border-radius:1px;border:0.5px solid rgba(74,46,38,0.2);background:rgba(255,255,255,0.6);font-size:12px;font-family:'Jost',sans-serif;color:var(--text);outline:none;letter-spacing:0.03em}
+.ask-input:focus{border-color:var(--rose)}
+.ask-btn{padding:12px 20px;border-radius:1px;border:none;background:var(--deep);color:var(--ivory);cursor:pointer;font-size:10px;font-family:'Jost',sans-serif;letter-spacing:0.12em;text-transform:uppercase;transition:all 0.2s;white-space:nowrap}
+.ask-btn:hover{background:var(--rose)}
+.ask-btn:disabled{opacity:0.3;cursor:not-allowed}
+.restart-btn{display:block;margin:36px auto 0;padding:10px 32px;border-radius:1px;border:0.5px solid rgba(74,46,38,0.2);background:transparent;cursor:pointer;font-size:10px;font-family:'Jost',sans-serif;color:var(--muted);letter-spacing:0.12em;text-transform:uppercase;transition:all 0.2s}
+.restart-btn:hover{background:var(--petal)}
+</style>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-H840K9ZV92"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-H840K9ZV92');
+</script>
+</head>
+<body>
+<canvas id="sakura-canvas"></canvas>
+<div class="app">
+  <div class="header">
+    <div class="header-eyebrow">
+      <div class="eyebrow-line"></div>
+      <span class="eyebrow-text">J-Beauty Finder</span>
+      <div class="eyebrow-line right"></div>
+    </div>
+    <h1>Find Your Perfect<br><em>Japanese Beauty</em></h1>
+    <div class="header-sub" id="header-sub">Personalized skincare recommendations from Japan</div>
+    <div class="header-bloom"></div>
+  </div>
+  <div class="lang-row">
+    <button class="lang-btn active" onclick="setLang('en',this)">🇺🇸 EN</button>
+    <button class="lang-btn" onclick="setLang('zh',this)">🇨🇳 中文</button>
+    <button class="lang-btn" onclick="setLang('ko',this)">🇰🇷 한국어</button>
+    <button class="lang-btn" onclick="setLang('fr',this)">🇫🇷 FR</button>
+    <button class="lang-btn" onclick="setLang('es',this)">🇪🇸 ES</button>
+    <button class="lang-btn" onclick="setLang('th',this)">🇹🇭 ไทย</button>
+    <button class="lang-btn" onclick="setLang('ar',this)">🇸🇦 AR</button>
+  </div>
+  <div id="quiz">
+    <div class="progress-wrap" id="progress-wrap">
+      <div class="progress-meta">
+        <span class="progress-step" id="step-label">Step 01 / 05</span>
+        <span class="progress-pct" id="step-pct">20%</span>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:20%"></div></div>
+    </div>
+    <!-- Q1 -->
+    <div class="step active" id="step-1">
+      <div class="q-card">
+        <div class="q-num">01</div>
+        <div class="q-label" id="ql-1">Skin Type</div>
+        <div class="q-text" id="qt-1">How would you describe your skin?</div>
+        <div class="options">
+          <div class="opt" onclick="sel(1,this,'dry')"><span class="opt-emoji"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M2 20h20M6 20c0-6 3-10 6-10s6 4 6 10"/><path d="M2 14c2-2 4-2 6 0"/><circle cx="18" cy="8" r="2"/></svg></span><span id="o1-1">Dry</span></div>
+          <div class="opt" onclick="sel(1,this,'oily')"><span class="opt-emoji"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg></span><span id="o1-2">Oily</span></div>
+          <div class="opt" onclick="sel(1,this,'combination')"><span class="opt-emoji"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><circle cx="12" cy="12" r="10"/><path d="M12 2a10 10 0 0 1 0 20 5 5 0 0 1 0-10 5 5 0 0 0 0-10"/><circle cx="12" cy="7" r="1.5" fill="currentColor"/><circle cx="12" cy="17" r="1.5"/></svg></span><span id="o1-3">Combination</span></div>
+          <div class="opt" onclick="sel(1,this,'sensitive')"><span class="opt-emoji"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><circle cx="12" cy="12" r="2"/><ellipse cx="12" cy="6" rx="2" ry="3"/><ellipse cx="12" cy="18" rx="2" ry="3"/><ellipse cx="6" cy="12" rx="3" ry="2"/><ellipse cx="18" cy="12" rx="3" ry="2"/></svg></span><span id="o1-4">Sensitive</span></div>
+          <div class="opt" onclick="sel(1,this,'normal')"><span class="opt-emoji"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><circle cx="12" cy="12" r="3"/><circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="10"/></svg></span><span id="o1-5">Normal</span></div>
+        </div>
+      </div>
+      <div class="nav"><button class="btn-next" id="next-1" onclick="nextStep(1)" disabled>Continue</button></div>
+    </div>
+    <!-- Q2 -->
+    <div class="step" id="step-2">
+      <div class="q-card">
+        <div class="q-num">02</div>
+        <div class="q-label" id="ql-2">Skin Concern</div>
+        <div class="q-text" id="qt-2">What's your main skin concern?</div>
+        <div class="options">
+          <div class="opt" onclick="sel(2,this,'brightening')"><span class="opt-emoji"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg></span><span id="o2-1">Brightening</span></div>
+          <div class="opt" onclick="sel(2,this,'anti-aging')"><span class="opt-emoji"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M5 3h14M5 21h14M7 3v4l5 5-5 5v4M17 3v4l-5 5 5 5v4"/></svg></span><span id="o2-2">Anti-aging</span></div>
+          <div class="opt" onclick="sel(2,this,'hydration')"><span class="opt-emoji"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M12 2C6 9 4 13 4 16a8 8 0 0 0 16 0c0-3-2-7-8-14z"/></svg></span><span id="o2-3">Hydration</span></div>
+          <div class="opt" onclick="sel(2,this,'pores')"><span class="opt-emoji"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><circle cx="12" cy="12" r="3"/><path d="M12 9V3M9 12H3M12 15v6M15 12h6"/><circle cx="12" cy="12" r="7" stroke-dasharray="2 2"/></svg></span><span id="o2-4">Pores</span></div>
+          <div class="opt" onclick="sel(2,this,'acne')"><span class="opt-emoji"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2" fill="currentColor"/></svg></span><span id="o2-5">Acne</span></div>
+          <div class="opt" onclick="sel(2,this,'pigmentation')"><span class="opt-emoji"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><circle cx="12" cy="12" r="10"/><path d="M12 2a10 10 0 0 0 0 20z" fill="currentColor" stroke="none"/></svg></span><span id="o2-6">Pigmentation</span></div>
+          <div class="opt" onclick="sel(2,this,'texture')"><span class="opt-emoji"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M12 22V12M12 12C9 9 5 8 5 5a4 4 0 0 1 7-2.65M12 12c3-3 7-4 7-7a4 4 0 0 0-7-2.65"/><path d="M12 12c-3 0-5 2-5 5a4 4 0 0 0 8 0c0-3-2-5-3-5"/></svg></span><span id="o2-7">Texture</span></div>
+          <div class="opt" onclick="sel(2,this,'redness')"><span class="opt-emoji"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><circle cx="12" cy="8" r="4"/><path d="M12 12v10M8 16h8"/><path d="M9 6c0 0-2-3 0-4s3 1 3 2M15 6c0 0 2-3 0-4s-3 1-3 2"/></svg></span><span id="o2-8">Redness</span></div>
+        </div>
+      </div>
+      <div class="nav">
+        <button class="btn-back" onclick="prevStep(2)">← Back</button>
+        <button class="btn-next" id="next-2" onclick="nextStep(2)" disabled>Continue</button>
+      </div>
+    </div>
+    <!-- Q3 -->
+    <div class="step" id="step-3">
+      <div class="q-card">
+        <div class="q-num">03</div>
+        <div class="q-label" id="ql-3">Texture</div>
+        <div class="q-text" id="qt-3">What texture do you prefer?</div>
+        <div class="options">
+          <div class="opt" onclick="sel(3,this,'lightweight')"><span class="opt-emoji"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M20.24 12.24a6 6 0 0 0-8.49-8.49L5 10.5V19h8.5z"/><line x1="16" y1="8" x2="2" y2="22"/><line x1="17.5" y1="15" x2="9" y2="15"/></svg></span><span id="o3-1">Lightweight / Watery</span></div>
+          <div class="opt" onclick="sel(3,this,'cream')"><span class="opt-emoji"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M7 11l5 11 5-11"/><path d="M5 8a7 7 0 0 1 14 0c0 3-2 5-4.5 5S8 11 8 8"/></svg></span><span id="o3-2">Rich cream</span></div>
+          <div class="opt" onclick="sel(3,this,'gel')"><span class="opt-emoji"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M6 3h12l4 6-10 13L2 9z"/><path d="M2 9h20M12 22V9M6 3l6 6 6-3"/></svg></span><span id="o3-3">Gel / Jelly</span></div>
+          <div class="opt" onclick="sel(3,this,'oil')"><span class="opt-emoji"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><circle cx="8" cy="14" r="4"/><circle cx="15" cy="8" r="3"/><circle cx="17" cy="17" r="2"/><circle cx="6" cy="7" r="1.5"/></svg></span><span id="o3-4">Oil / Serum</span></div>
+          <div class="opt" onclick="sel(3,this,'any')"><span class="opt-emoji"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M2 22c0-8 6-14 14-14M16 8c0 5.5-4 10-9 12"/></svg></span><span id="o3-5">No preference</span></div>
+        </div>
+      </div>
+      <div class="nav">
+        <button class="btn-back" onclick="prevStep(3)">← Back</button>
+        <button class="btn-next" id="next-3" onclick="nextStep(3)" disabled>Continue</button>
+      </div>
+    </div>
+    <!-- Q4 -->
+    <div class="step" id="step-4">
+      <div class="q-card">
+        <div class="q-num">04</div>
+        <div class="q-label" id="ql-4">Budget</div>
+        <div class="q-text" id="qt-4">What's your budget per product?</div>
+        <div class="options">
+          <div class="opt" onclick="sel(4,this,'budget')"><span class="opt-emoji"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="3"/><path d="M2 10h20M2 14h20"/></svg></span><span id="o4-1">Under ¥2,000</span></div>
+          <div class="opt" onclick="sel(4,this,'mid')"><span class="opt-emoji"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><ellipse cx="12" cy="8" rx="8" ry="4"/><path d="M4 8v4c0 2.2 3.6 4 8 4s8-1.8 8-4V8"/><path d="M4 12v4c0 2.2 3.6 4 8 4s8-1.8 8-4v-4"/></svg></span><span id="o4-2">¥2,000–¥6,000</span></div>
+          <div class="opt" onclick="sel(4,this,'premium')"><span class="opt-emoji"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M2 19h20M2 19l3-9 5 4 2-6 2 6 5-4 3 9"/><circle cx="12" cy="4" r="1" fill="currentColor"/><circle cx="4" cy="10" r="1" fill="currentColor"/><circle cx="20" cy="10" r="1" fill="currentColor"/></svg></span><span id="o4-3">¥6,000+</span></div>
+        </div>
+      </div>
+      <div class="nav">
+        <button class="btn-back" onclick="prevStep(4)">← Back</button>
+        <button class="btn-next" id="next-4" onclick="nextStep(4)" disabled>Continue</button>
+      </div>
+    </div>
+    <!-- Q5 -->
+    <div class="step" id="step-5">
+      <div class="q-card">
+        <div class="q-num">05</div>
+        <div class="q-label" id="ql-5">Lifestyle</div>
+        <div class="q-text" id="qt-5">How do you usually shop?</div>
+        <div class="options">
+          <div class="opt" onclick="sel(5,this,'inbound')"><span class="opt-emoji"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.5 12 19.79 19.79 0 0 1 1.43 3.38 2 2 0 0 1 3.4 1.21h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L7.91 9.91a16 16 0 0 0 6.18 6.18l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg></span><span id="o5-1">Visiting Japan now</span></div>
+          <div class="opt" onclick="sel(5,this,'online')"><span class="opt-emoji"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M21 10V6a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 6v4"/><path d="M3 10l9 5 9-5M12 15v7"/><path d="M3 10v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 18v-8"/></svg></span><span id="o5-2">Online delivery</span></div>
+          <div class="opt" onclick="sel(5,this,'both')"><span class="opt-emoji"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15 15 0 0 1 4 10 15 15 0 0 1-4 10 15 15 0 0 1-4-10 15 15 0 0 1 4-10z"/></svg></span><span id="o5-3">Both</span></div>
+        </div>
+      </div>
+      <div class="nav">
+        <button class="btn-back" onclick="prevStep(5)">← Back</button>
+        <button class="btn-next" id="next-5" onclick="getRecommendations()" disabled>Discover My Beauty ✨</button>
+      </div>
+    </div>
+    <!-- LOADING -->
+    <div class="step" id="step-loading">
+      <div class="loading-wrap">
+        <div class="petal-loader"></div>
+        <div class="loading-text" id="loading-text">Curating your ritual...</div>
+        <div class="loading-sub" id="loading-sub">Finding the finest Japanese beauty for you</div>
+      </div>
+    </div>
+    <!-- RESULTS -->
+    <div class="step" id="step-results">
+      <div class="result-header">
+        <div class="result-eyebrow">
+          <div class="eyebrow-line"></div>
+          <div class="result-badge" id="result-badge">Your Skin Profile</div>
+          <div class="eyebrow-line right"></div>
+        </div>
+        <div class="result-title" id="result-title">Your J-Beauty Ritual</div>
+        <p class="result-intro" id="result-intro"></p>
+      </div>
+      <div class="products-grid" id="products-grid"></div>
+      <div class="ai-section">
+        <div class="ai-header">
+          <div class="ai-dot"></div>
+          <span class="ai-label-text" id="ai-label-text">Beauty Advisor</span>
+        </div>
+        <div class="ai-response" id="ai-response"></div>
+        <div class="ask-wrap">
+          <input class="ask-input" id="ask-input" placeholder="Ask about ingredients, routines, or products..." />
+          <button class="ask-btn" onclick="askQ()" id="ask-btn">Ask</button>
+        </div>
+      </div>
+      <button class="restart-btn" onclick="restart()" id="restart-btn">↺ Start Over</button>
+    </div>
+  </div>
+</div>
+<script>
+const ans={};let lang='en';
+
+const CURRENCY={
+  en:{code:'USD',symbol:'$'},zh:{code:'CNY',symbol:'CN¥'},ko:{code:'KRW',symbol:'₩'},
+  fr:{code:'EUR',symbol:'€'},es:{code:'EUR',symbol:'€'},th:{code:'THB',symbol:'฿'},ar:{code:'AED',symbol:'د.إ'}
+};
+let rates={};
+
+async function fetchRates(){
+  try{
+    const r=await fetch('https://open.er-api.com/v6/latest/JPY');
+    const d=await r.json();
+    if(d.rates)rates=d.rates;
+  }catch(e){
+    rates={USD:0.0067,CNY:0.048,KRW:9.2,EUR:0.0061,THB:0.24,AED:0.025};
+  }
+}
+fetchRates();
+
+function convertPrice(jpyStr){
+  const cur=CURRENCY[lang]||CURRENCY.en;
+  const num=parseInt(String(jpyStr).replace(/[¥,]/g,''));
+  if(isNaN(num))return jpyStr;
+  // レートがまだ取得できていない場合のフォールバック
+  const fallback={USD:0.0067,CNY:0.048,KRW:9.2,EUR:0.0061,THB:0.24,AED:0.025};
+  const rate=rates[cur.code]||fallback[cur.code];
+  if(!rate)return jpyStr;
+  const conv=num*rate;
+  let fmt;
+  if(cur.code==='KRW')fmt=Math.round(conv).toLocaleString();
+  else if(cur.code==='CNY'||cur.code==='AED')fmt=conv.toFixed(1);
+  else fmt=conv.toFixed(2);
+  // AEDは記号が後ろ
+  if(cur.code==='AED')return jpyStr+' (~'+fmt+' '+cur.symbol+')';
+  return jpyStr+' (~'+cur.symbol+fmt+')';
+}
+
+const T={
+  en:{sub:"Personalized skincare recommendations from Japan",stepOf:(c,t)=>`Step 0${c} / 0${t}`,loading:"Curating your ritual...",loadSub:"Finding the finest Japanese beauty for you",aiLabel:"Beauty Advisor",askPh:"Ask about ingredients, routines, or products...",askBtn:"Ask",restart:"↺ Start Over",buyBtn:"Shop Now →",profile:"Your Skin Profile",title:"Your J-Beauty Ritual",q1label:"Skin Type",q1:"How would you describe your skin?",o1:["Dry","Oily","Combination","Sensitive","Normal"],q2label:"Skin Concern",q2:"What's your main skin concern?",o2:["Brightening","Anti-aging","Hydration","Pores","Acne","Pigmentation","Texture","Redness"],q3label:"Texture",q3:"What texture do you prefer?",o3:["Lightweight / Watery","Rich cream","Gel / Jelly","Oil / Serum","No preference"],q4label:"Budget",q4:"What's your budget per product?",o4:["Under ¥2,000 (~$13)","¥2,000–¥6,000 (~$13-40)","¥6,000+ (~$40+)"],q5label:"Lifestyle",q5:"How do you usually shop?",o5:["Visiting Japan now","Online delivery","Both"]},
+  zh:{sub:"来自日本的个性化护肤推荐",stepOf:(c,t)=>`第${c}步 / 共${t}步`,loading:"正在为您精选...",loadSub:"寻找最适合您的日本美妆",aiLabel:"美容顾问",askPh:"询问成分、护肤步骤或产品...",askBtn:"提问",restart:"↺ 重新开始",buyBtn:"立即购买 →",profile:"您的肤质档案",title:"您的日系美肤方案",q1label:"肤质类型",q1:"您如何描述自己的肤质？",o1:["干性","油性","混合性","敏感性","中性"],q2label:"肌肤烦恼",q2:"您最主要的肌肤烦恼是？",o2:["提亮肤色","抗衰老","保湿","缩小毛孔","痘痘","黑色素沉着","改善肤质","消除红色"],q3label:"质地偏好",q3:"您喜欢哪种质地？",o3:["轻薄清爽","浓郁乳霜","冻胶冻啫喱","精华油","无所谓"],q4label:"预算",q4:"每件产品的预算是？",o4:["¥2,000以下 (~CNY96)","¥2,000–¥6,000 (~CNY96-288)","¥6,000以上 (~CNY288+)"],q5label:"购物方式",q5:"您通常如何购物？",o5:["正在日本旅行","网购配送","两者都有"]},
+  ko:{sub:"일본 맞춤 스킨케어 추천",stepOf:(c,t)=>`${c} / ${t} 단계`,loading:"맞춤 루틴을 찾는 중...",loadSub:"최적의 일본 뷰티를 찾고 있어요",aiLabel:"뷰티 어드바이저",askPh:"성분, 루틴, 제품에 대해 물어보세요...",askBtn:"질문",restart:"↺ 다시 시작",buyBtn:"지금 구매 →",profile:"나의 피부 프로필",title:"나의 J-뷰티 루틴",q1label:"피부 타입",q1:"당신의 피부를 어떻게 표현하세요?",o1:["건성","지성","복합성","민감성","중성"],q2label:"피부 고민",q2:"주요 피부 고민은 무엇인가요?",o2:["미백","노화방지","수분공급","모공관리","여드름","색소침신","트러블 개선","빈혼 진정"],q3label:"텍스처",q3:"어떤 텍스처를 선호하세요?",o3:["가벼운 워터리","리치 크림","젤 / 젤리","오일 / 세럼","상관없음"],q4label:"예산",q4:"제품 1개당 예산은?",o4:["¥2,000 이하 (~₩18,000)","¥2,000–¥6,000 (~₩18k-55k)","¥6,000 이상 (~₩55,000+)"],q5label:"라이프스타일",q5:"주로 어디서 쇼핑하세요?",o5:["현재 일본 여행 중","온라인 배송","둘 다"]},
+  fr:{sub:"Recommandations beauté japonaises personnalisées",stepOf:(c,t)=>`Étape 0${c} / 0${t}`,loading:"Création de votre rituel...",loadSub:"Recherche des meilleures beautés japonaises",aiLabel:"Conseillère Beauté",askPh:"Posez vos questions sur les ingrédients, routines...",askBtn:"Demander",restart:"↺ Recommencer",buyBtn:"Acheter →",profile:"Votre Profil",title:"Votre Rituel J-Beauty",q1label:"Type de peau",q1:"Comment décririez-vous votre peau?",o1:["Sèche","Grasse","Mixte","Sensible","Normale"],q2label:"Problème de peau",q2:"Quel est votre principal problème?",o2:["Éclat","Anti-âge","Hydratation","Pores","Acné","Pigmentation","Texture","Rougeurs"],q3label:"Texture",q3:"Quelle texture préférez-vous?",o3:["Légère / Aqueuse","Crème riche","Gel / Gelée","Huile / Sérum","Peu importe"],q4label:"Budget",q4:"Quel est votre budget par produit?",o4:["Moins de ¥2,000 (~€12)","¥2,000–¥6,000 (~€12-37)","¥6,000+ (~€37+)"],q5label:"Habitudes",q5:"Comment faites-vous vos achats?",o5:["En visite au Japon","Livraison en ligne","Les deux"]},
+  es:{sub:"Recomendaciones de skincare japonés personalizadas",stepOf:(c,t)=>`Paso 0${c} / 0${t}`,loading:"Creando tu ritual...",loadSub:"Encontrando la mejor belleza japonesa para ti",aiLabel:"Asesora de Belleza",askPh:"Pregunta sobre ingredientes, rutinas o productos...",askBtn:"Preguntar",restart:"↺ Empezar de nuevo",buyBtn:"Comprar →",profile:"Tu Perfil",title:"Tu Ritual J-Beauty",q1label:"Tipo de piel",q1:"¿Cómo describirías tu piel?",o1:["Seca","Grasa","Mixta","Sensible","Normal"],q2label:"Preocupación",q2:"¿Cuál es tu principal preocupación?",o2:["Luminosidad","Antienvejecimiento","Hidratación","Poros","Acné","Pigmentación","Textura","Rojeces"],q3label:"Textura",q3:"¿Qué textura prefieres?",o3:["Ligera / Acuosa","Crema rica","Gel / Jalea","Aceite / Sérum","Sin preferencia"],q4label:"Presupuesto",q4:"¿Cuál es tu presupuesto por producto?",o4:["Menos de ¥2,000 (~€12)","¥2,000–¥6,000 (~€12-37)","¥6,000+ (~€37+)"],q5label:"Estilo de vida",q5:"¿Cómo sueles comprar?",o5:["Visitando Japón ahora","Entrega en línea","Ambos"]},
+  th:{sub:"คำแนะนำสกินแคร์ญี่ปุ่นส่วนตัวสำหรับคุณ",stepOf:(c,t)=>`ขั้นตอน ${c} / ${t}`,loading:"กำลังคัดสรรให้คุณ...",loadSub:"ค้นหาความงามญี่ปุ่นที่เหมาะสมกับคุณ",aiLabel:"ที่ปรึกษาความงาม",askPh:"ถามเกี่ยวกับส่วนผสม ขั้นตอน หรือผลิตภัณฑ์...",askBtn:"ถาม",restart:"↺ เริ่มใหม่",buyBtn:"ซื้อเลย →",profile:"โปรไฟล์ผิวของคุณ",title:"พิธีกรรม J-Beauty ของคุณ",q1label:"ประเภทผิว",q1:"ผิวของคุณเป็นแบบไหน?",o1:["ผิวแห้ง","ผิวมัน","ผิวผสม","ผิวแพ้ง่าย","ผิวธรรมดา"],q2label:"ปัญหาผิว",q2:"ปัญหาหลักของผิวคุณคือ?",o2:["ผิวกระจ่างใส","ต้านริ้วรอย","ความชุ่มชื้น","รูขุมขน","สิวอักเสบ","จุดด่างดำ","เนื้อสัมผัส","สีแดง"],q3label:"เนื้อสัมผัส",q3:"ชอบเนื้อสัมผัสแบบไหน?",o3:["บางเบา","ครีมเข้มข้น","เจล / เจลลี่","น้ำมัน / เซรั่ม","ไม่มีความเห็น"],q4label:"งบประมาณ",q4:"งบประมาณต่อชิ้นคือ?",o4:["ต่ำกว่า ¥2,000 (~฿480)","¥2,000–¥6,000 (~฿480-1,440)","¥6,000+ (~฿1,440+)"],q5label:"ไลฟ์สไตล์",q5:"คุณช้อปปิ้งอย่างไร?",o5:["กำลังเดินทางญี่ปุ่น","สั่งซื้อออนไลน์","ทั้งสอง"]},
+  ar:{sub:"توصيات العناية بالبشرة اليابانية الشخصية",stepOf:(c,t)=>`الخطوة ${c} من ${t}`,loading:"نختار لك الأفضل...",loadSub:"نبحث عن أجمل منتجات الجمال اليابانية",aiLabel:"مستشارة الجمال",askPh:"اسأل عن المكونات أو روتين العناية...",askBtn:"اسأل",restart:"↺ ابدأ من جديد",buyBtn:"تسوق الآن →",profile:"ملف بشرتك",title:"روتينك الياباني",q1label:"نوع البشرة",q1:"كيف تصف بشرتك?",o1:["جافة","دهنية","مختلطة","حساسة","عادية"],q2label:"مشكلة البشرة",q2:"ما هي مشكلتك الرئيسية?",o2:["إشراق","مكافحة الشيخوخة","ترطيب","مسام الجلد","حب الشباب","تصبغات","ملمس","احمرار"],q3label:"القوام",q3:"أي قوام تفضل?",o3:["خفيف / مائي","كريم دسم","جيل / هلامي","زيت / سيروم","لا تفضيل"],q4label:"الميزانية",q4:"ما ميزانيتك لكل منتج?",o4:["أقل من ¥2,000 (~د.إ 18)","¥2,000–¥6,000 (~د.إ 18-55)","¥6,000+ (~د.إ 55+)"],q5label:"نمط الحياة",q5:"كيف تتسوق عادةً?",o5:["تزور اليابان حالياً","توصيل عبر الإنترنت","كلاهما"]}
+};
+
+function setLang(l,btn){
+  lang=l;
+  document.querySelectorAll('.lang-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  const t=T[l]||T.en;
+  document.getElementById('header-sub').textContent=t.sub;
+  document.getElementById('ask-input').placeholder=t.askPh;
+  document.getElementById('ask-btn').textContent=t.askBtn;
+  const ids=['ql-1','ql-2','ql-3','ql-4','ql-5'];
+  const qids=['qt-1','qt-2','qt-3','qt-4','qt-5'];
+  const lkeys=['q1label','q2label','q3label','q4label','q5label'];
+  const qkeys=['q1','q2','q3','q4','q5'];
+  ids.forEach((id,i)=>{const el=document.getElementById(id);if(el)el.textContent=t[lkeys[i]]||'';});
+  qids.forEach((id,i)=>{const el=document.getElementById(id);if(el)el.textContent=t[qkeys[i]]||'';});
+  const okeys=['o1','o2','o3','o4','o5'];
+  okeys.forEach((ok,qi)=>{
+    if(t[ok])(t[ok]).forEach((v,i)=>{const el=document.getElementById('o'+(qi+1)+'-'+(i+1));if(el)el.textContent=v;});
+  });
+  const nb=document.getElementById('next-5');if(nb)nb.textContent=t.buyBtn==='Shop Now →'?'Discover My Beauty ✨':t.buyBtn;
+}
+
+function sel(step,el,val){
+  document.querySelectorAll('#step-'+step+' .opt').forEach(o=>o.classList.remove('selected'));
+  el.classList.add('selected');ans[step]=val;
+  const nb=document.getElementById('next-'+step);if(nb)nb.disabled=false;
+}
+function showStep(id){
+  document.querySelectorAll('.step').forEach(s=>s.classList.remove('active'));
+  document.getElementById('step-'+id).classList.add('active');
+  if(typeof id==='number'&&id<=5){
+    const pct=Math.round((id/5)*100);
+    document.getElementById('progress-fill').style.width=pct+'%';
+    const t=T[lang]||T.en;
+    document.getElementById('step-label').textContent=t.stepOf(id,5);
+    document.getElementById('step-pct').textContent=pct+'%';
+  }
+}
+function nextStep(c){if(!ans[c])return;showStep(c+1);}
+function prevStep(c){showStep(c-1);}
+
+const PRODUCTS={
+  dry:{
+    budget:[
+      {brand:'Hada Labo',name:'Gokujyun Lotion',desc:'Legendary hyaluronic acid toner for deep moisture.',tags:['Hydrating','Fragrance-free'],price:'¥880',img:'https://thumbnail.image.rakuten.co.jp/@0_mall/at-life/cabinet/img2022/4987241127474.jpg?_ex=288x288',affiliate:'https://a.r10.to/hgGDde'},
+      {brand:'Senka',name:'Perfect Whip Foam',desc:'Silk protein cleanser that never strips moisture.',tags:['Gentle','Moisturizing'],price:'¥680',img:'https://thumbnail.image.rakuten.co.jp/@0_mall/sundrug/cabinet/82/4550516474568.jpg?_ex=288x288',affiliate:'https://a.r10.to/hXUJIt'},
+      {brand:'Rohto',name:'Hada Labo Premium Milk',desc:'Rich milk moisturizer with 5 types of hyaluronic acid.',tags:['Rich','Plumping'],price:'¥1,200',img:'https://thumbnail.image.rakuten.co.jp/@0_mall/at-life/cabinet/2020c/4987241167029.jpg?_ex=288x288',affiliate:'https://a.r10.to/h5N5Uu'},
+      {brand:'DHC',name:'Deep Cleansing Oil',desc:'Best-selling olive oil makeup remover from Japan.',tags:['Cleansing','Nourishing'],price:'¥1,400',img:'https://thumbnail.image.rakuten.co.jp/@0_mall/dhcshop/cabinet/8000000300.jpg?_ex=288x288',affiliate:'https://a.r10.to/hgE4D8'}
+    ],
+    mid:[
+      {brand:'FANCL',name:'Mild Cleansing Oil',desc:'Preservative-free gentle oil cleanser loved across Asia.',tags:['Sensitive','Pure'],price:'¥1,980',img:'https://thumbnail.image.rakuten.co.jp/@0_mall/fancl-shop/cabinet/item-img/1500-1999/1843.jpg?_ex=240x240',affiliate:'https://a.r10.to/h8F7Yt'},
+      {brand:'Elixir',name:'Superieur Emulsion',desc:'Iconic moisturizing emulsion by Shiseido for supple skin.',tags:['Anti-aging','Firming'],price:'¥3,850',img:'https://tshop.r10s.jp/yayoi-cosme/cabinet/08015879/11875858/imgrc0114718953.jpg?_ex=200x200&s=0&r=1',affiliate:'https://a.r10.to/hPJDga'},
+      {brand:'Hada Labo',name:'Gokujyun Premium Serum',desc:'Ultra-concentrated hyaluronic serum for parched skin.',tags:['Intensive','Hydrating'],price:'¥2,500',img:'https://thumbnail.image.rakuten.co.jp/@0_mall/at-life/cabinet/img2022/4987241127474.jpg?_ex=288x288',affiliate:'https://a.r10.to/hgGDde'},
+      {brand:'Kose',name:'Sekkisei Lotion',desc:'Herbal brightening lotion — a Japanese beauty icon.',tags:['Brightening','Herbal'],price:'¥4,400',img:'https://tshop.r10s.jp/yayoi-cosme/cabinet/07142378/10340750/4971710573855.jpg?_ex=200x200&s=0&r=1',affiliate:'https://a.r10.to/hHB9rK'}
+    ],
+    premium:[
+      {brand:'SK-II',name:'Facial Treatment Essence',desc:'The legendary Pitera essence for luminous, youthful skin.',tags:['Premium','Brightening'],price:'¥22,000',img:'https://thumbnail.image.rakuten.co.jp/@0_mall/kind-s-care/cabinet/4514254000556.jpg?_ex=240x240',affiliate:'https://a.r10.to/hPSQbO'},
+      {brand:'Shiseido',name:'Ultimune Concentrate',desc:'Iconic serum that fortifies the skin natural defenses.',tags:['Anti-aging','Firming'],price:'¥9,680',img:'https://thumbnail.image.rakuten.co.jp/@0_mall/brandshiseido/cabinet/prd/maq/maq-ul2201.jpg?_ex=240x240',affiliate:'https://a.r10.to/hPSQsS'},
+      {brand:'Cle de Peau',name:'La Creme Texture Riche',desc:'The most prestigious Shiseido moisturizer for radiant skin.',tags:['Luxury','Intensive'],price:'¥38,500',img:'https://thumbnail.image.rakuten.co.jp/@0_mall/kind-s-care/cabinet/4514254129562.jpg?_ex=240x240',affiliate:'https://a.r10.to/h54Qbu'},
+      {brand:'Albion',name:'Skin Conditioner Essential',desc:'Cult Japanese toner for calming and brightening.',tags:['Premium','Brightening'],price:'¥4,950',img:'https://thumbnail.image.rakuten.co.jp/@0_mall/onemakem/cabinet/biiino/item/main-image/20240227131355_1.jpg?_ex=240x240',affiliate:'https://a.r10.to/hghkYZ'}
+    ]
+  },
+  oily:{
+    budget:[
+      {brand:'Biore',name:'UV Aqua Rich Watery Essence',desc:'Feather-light SPF50 sunscreen loved worldwide.',tags:['SPF50','Matte'],price:'¥900',img:'https://thumbnail.image.rakuten.co.jp/@0_mall/rakuten24/cabinet/647/4901301447647.jpg?_ex=288x288',affiliate:'https://a.r10.to/hPoqBJ'},
+      {brand:'Canmake',name:'Marshmallow Finish Powder',desc:'Controls shine all day for an airbrushed look.',tags:['Mattifying','Pore'],price:'¥880',img:'https://thumbnail.image.rakuten.co.jp/@0_mall/soukaikenbi/cabinet/069/4901008308661.jpg?_ex=288x288',affiliate:'https://a.r10.to/hghewj'},
+      {brand:'Hada Labo',name:'Gokujyun Light Lotion',desc:'Oil-free hyaluronic acid toner for oily skin.',tags:['Oil-free','Hydrating'],price:'¥880',img:'https://thumbnail.image.rakuten.co.jp/@0_mall/at-life/cabinet/img2022/4987241127474.jpg?_ex=288x288',affiliate:'https://a.r10.to/hgGDde'},
+      {brand:'Senka',name:'Perfect Whip Foam',desc:'Amino acid foam cleanser that balances oil.',tags:['Balancing','Gentle'],price:'¥600',img:'https://thumbnail.image.rakuten.co.jp/@0_mall/sundrug/cabinet/82/4550516474568.jpg?_ex=288x288',affiliate:'https://a.r10.to/hXUJIt'}
+    ],
+    mid:[
+      {brand:'FANCL',name:'Mild Cleansing Oil',desc:'Gentle yet effective for oily skin types.',tags:['Balancing','Pure'],price:'¥1,980',img:'https://thumbnail.image.rakuten.co.jp/@0_mall/fancl-shop/cabinet/item-img/1500-1999/1843.jpg?_ex=240x240',affiliate:'https://a.r10.to/h8F7Yt'},
+      {brand:'Anessa',name:'Perfect UV Sunscreen Milk',desc:'Sweat-proof SPF50+ — top sunscreen in Japan.',tags:['SPF50+','Waterproof'],price:'¥2,860',img:'https://tshop.r10s.jp/rakuten24/cabinet/105/4909978147105.jpg?_ex=200x200&s=0&r=1',affiliate:'https://a.r10.to/h8FmkF'},
+      {brand:'Kose',name:'Sekkisei White UV',desc:'Brightening UV protection with herbal extracts.',tags:['SPF','Brightening'],price:'¥3,300',img:'https://tshop.r10s.jp/yayoi-cosme/cabinet/07142378/10340750/4971710573855.jpg?_ex=200x200&s=0&r=1',affiliate:'https://a.r10.to/hHB9rK'},
+      {brand:'Rohto',name:'Hada Labo Shirojyun Serum',desc:'Brightening serum for oily skin prone to pigmentation.',tags:['Vitamin C','Brightening'],price:'¥1,800',img:'https://thumbnail.image.rakuten.co.jp/@0_mall/sundrug/cabinet/34/4987241168446.jpg?_ex=288x288',affiliate:'https://a.r10.to/hg2V3o'}
+    ],
+    premium:[
+      {brand:'SK-II',name:'Facial Treatment Essence',desc:'The legendary Pitera essence — works beautifully on oily skin.',tags:['Premium','Balancing'],price:'¥22,000',img:'https://thumbnail.image.rakuten.co.jp/@0_mall/kind-s-care/cabinet/4514254000556.jpg?_ex=240x240',affiliate:'https://a.r10.to/hPSQbO'},
+      {brand:'Shiseido',name:'Future Solution LX',desc:'Ultimate anti-aging collection for all skin types.',tags:['Luxury','Anti-aging'],price:'¥15,400',img:'https://thumbnail.image.rakuten.co.jp/@0_mall/brandshiseido/cabinet/prd/maq/maq-ul2201.jpg?_ex=240x240',affiliate:'https://a.r10.to/hPSQsS'},
+      {brand:'Pola',name:'B.A Lotion',desc:'Award-winning anti-aging lotion from a top prestige brand.',tags:['Premium','Firming'],price:'¥16,500',img:'https://thumbnail.image.rakuten.co.jp/@0_mall/tokyokaei666888/cabinet/07333809/10150420/imgrc0142703512.jpg?_ex=288x288',affiliate:'https://a.r10.to/hPqzvS'},
+      {brand:'Decorte',name:'AQ Meliority Intensive Serum',desc:'Luxury serum that perfects skin texture and clarity.',tags:['Luxury','Refining'],price:'¥29,700',img:'https://thumbnail.image.rakuten.co.jp/@0_mall/tokitomecosme/cabinet/main-6/4971710370355-raa.jpg?_ex=240x240',affiliate:'https://a.r10.to/hPzJR5'}
+    ]
+  },
+  sensitive:{
+    budget:[
+      {brand:'Hada Labo',name:'Gokujyun Sensitive Lotion',desc:'Alcohol-free hyaluronic lotion for reactive skin.',tags:['Fragrance-free','Gentle'],price:'¥980',img:'https://thumbnail.image.rakuten.co.jp/@0_mall/at-life/cabinet/img2022/4987241127474.jpg?_ex=288x288',affiliate:'https://a.r10.to/hgGDde'},
+      {brand:'Senka',name:'Perfect Whip Sensitive',desc:'Ultra-gentle foam for sensitive and easily irritated skin.',tags:['Hypoallergenic','Mild'],price:'¥700',img:'https://thumbnail.image.rakuten.co.jp/@0_mall/sundrug/cabinet/82/4550516474568.jpg?_ex=288x288',affiliate:'https://a.r10.to/hXUJIt'},
+      {brand:'Biore',name:'UV Sensitive Milk SPF50',desc:'Mineral-first sunscreen formulated for sensitive skin.',tags:['SPF50','Mineral'],price:'¥1,100',img:'https://thumbnail.image.rakuten.co.jp/@0_mall/rakuten24/cabinet/844/4901301303844.jpg?_ex=288x288',affiliate:'https://a.r10.to/hRNgTO'},
+      {brand:'DHC',name:'Olive Virgin Oil',desc:'Pure olive oil skin treatment with minimal ingredients.',tags:['Natural','Pure'],price:'¥1,620',img:'https://thumbnail.image.rakuten.co.jp/@0_mall/dhcshop/cabinet/8000000001.jpg?_ex=288x288',affiliate:'https://a.r10.to/hgfRJW'}
+    ],
+    mid:[
+      {brand:'FANCL',name:'Mild Cleansing Oil',desc:'Preservative-free and additive-free — ideal for sensitive skin.',tags:['Pure','Gentle'],price:'¥1,980',img:'https://thumbnail.image.rakuten.co.jp/@0_mall/fancl-shop/cabinet/item-img/1500-1999/1843.jpg?_ex=240x240',affiliate:'https://a.r10.to/h8F7Yt'},
+      {brand:'FANCL',name:'Moist Refine Lotion',desc:'Additive-free toner that soothes and hydrates gently.',tags:['Additive-free','Soothing'],price:'¥2,900',img:'https://thumbnail.image.rakuten.co.jp/@0_mall/fancl-shop/cabinet/item-img/3500-3999/3745.jpg?_ex=240x240',affiliate:'https://a.r10.to/hgiYFd'},
+      {brand:'Elixir',name:'Superieur Skin Care Lotion',desc:'Gentle daily lotion by Shiseido loved by sensitive types.',tags:['Gentle','Balancing'],price:'¥3,300',img:'https://tshop.r10s.jp/yayoi-cosme/cabinet/08015879/11875858/imgrc0114718953.jpg?_ex=200x200&s=0&r=1',affiliate:'https://a.r10.to/hPJDga'},
+      {brand:'Kracie',name:'Hadabisei Serum Mask',desc:'Sheet mask serum — ultra-gentle and deeply hydrating.',tags:['Mask','Soothing'],price:'¥2,200',img:'https://thumbnail.image.rakuten.co.jp/@0_mall/at-life/cabinet/img2022/4987241127474.jpg?_ex=288x288',affiliate:'https://a.r10.to/hgGDde'}
+    ],
+    premium:[
+      {brand:'SK-II',name:'Facial Treatment Gentle Cleanser',desc:'Pitera-infused gentle cleanser for delicate skin.',tags:['Pitera','Luxury'],price:'¥6,600',img:'https://thumbnail.image.rakuten.co.jp/@0_mall/kind-s-care/cabinet/4514254000556.jpg?_ex=240x240',affiliate:'https://a.r10.to/hPSQbO'},
+      {brand:'Shiseido',name:'Benefiance Wrinkle Smoothing Cream',desc:'Rich yet gentle cream for sensitive and mature skin.',tags:['Anti-aging','Calming'],price:'¥8,800',img:'https://thumbnail.image.rakuten.co.jp/@0_mall/brandshiseido/cabinet/prd/bnf0002/bnf0002_nl2601.jpg?_ex=240x240',affiliate:'https://a.r10.to/hgY6MV'},
+      {brand:'Pola',name:'B.A Cleansing',desc:'Award-winning cleansing oil for the most delicate skin.',tags:['Luxury','Gentle'],price:'¥8,800',img:'https://thumbnail.image.rakuten.co.jp/@0_mall/tokyokaei666888/cabinet/07333809/10150420/imgrc0142703512.jpg?_ex=288x288',affiliate:'https://a.r10.to/hPqzvS'},
+      {brand:'Albion',name:'Skin Conditioner Essential',desc:'Cult Japanese toner for calming redness and sensitivity.',tags:['Calming','Iconic'],price:'¥4,950',img:'https://thumbnail.image.rakuten.co.jp/@0_mall/onemakem/cabinet/biiino/item/main-image/20240227131355_1.jpg?_ex=240x240',affiliate:'https://a.r10.to/hghkYZ'}
+    ]
+  },
+  combination:{
+    budget:[
+      {brand:'Hada Labo',name:'Gokujyun Light Lotion',desc:'Balancing hyaluronic toner — hydrates without greasiness.',tags:['Balancing','Light'],price:'¥880',img:'https://thumbnail.image.rakuten.co.jp/@0_mall/at-life/cabinet/img2022/4987241127474.jpg?_ex=288x288',affiliate:'https://a.r10.to/hgGDde'},
+      {brand:'Biore',name:'UV Aqua Rich',desc:'Watery SPF50 perfect for T-zone prone skin.',tags:['SPF50','Light'],price:'¥900',img:'https://thumbnail.image.rakuten.co.jp/@0_mall/rakuten24/cabinet/647/4901301447647.jpg?_ex=288x288',affiliate:'https://a.r10.to/hPoqBJ'},
+      {brand:'Canmake',name:'Mermaid Skin Gel UV',desc:'All-in-one SPF gel with a beautiful dewy finish.',tags:['SPF','Dewy'],price:'¥880',img:'https://thumbnail.image.rakuten.co.jp/@0_mall/0101marui/cabinet/cc007/407/784901008312132_1.jpg?_ex=288x288',affiliate:'https://a.r10.to/h5gXGn'},
+      {brand:'Senka',name:'Perfect Whip Foam',desc:'Balancing cleanser that suits combination skin perfectly.',tags:['Balancing','Gentle'],price:'¥600',img:'https://thumbnail.image.rakuten.co.jp/@0_mall/sundrug/cabinet/82/4550516474568.jpg?_ex=288x288',affiliate:'https://a.r10.to/hXUJIt'}
+    ],
+    mid:[
+      {brand:'FANCL',name:'Mild Cleansing Oil',desc:'Gentle yet effective for combination skin types.',tags:['Balancing','Pure'],price:'¥1,980',img:'https://thumbnail.image.rakuten.co.jp/@0_mall/fancl-shop/cabinet/item-img/1500-1999/1843.jpg?_ex=240x240',affiliate:'https://a.r10.to/h8F7Yt'},
+      {brand:'Kose',name:'Sekkisei Lotion',desc:'Balancing herbal lotion — a Japanese icon for over 60 years.',tags:['Herbal','Brightening'],price:'¥4,400',img:'https://tshop.r10s.jp/yayoi-cosme/cabinet/07142378/10340750/4971710573855.jpg?_ex=200x200&s=0&r=1',affiliate:'https://a.r10.to/hHB9rK'},
+      {brand:'Elixir',name:'Superieur Day Emulsion',desc:'Lightweight emulsion that hydrates and mattifies.',tags:['Balancing','Daily'],price:'¥3,300',img:'https://tshop.r10s.jp/yayoi-cosme/cabinet/08015879/11875858/imgrc0114718953.jpg?_ex=200x200&s=0&r=1',affiliate:'https://a.r10.to/hPJDga'},
+      {brand:'Anessa',name:'Perfect UV Milk',desc:'Award-winning Shiseido sunscreen for combination skin.',tags:['SPF50+','Balanced'],price:'¥2,860',img:'https://tshop.r10s.jp/rakuten24/cabinet/105/4909978147105.jpg?_ex=200x200&s=0&r=1',affiliate:'https://a.r10.to/h8FmkF'}
+    ],
+    premium:[
+      {brand:'SK-II',name:'Facial Treatment Essence',desc:'Balances and perfects — works beautifully on combination skin.',tags:['Balancing','Iconic'],price:'¥22,000',img:'https://thumbnail.image.rakuten.co.jp/@0_mall/kind-s-care/cabinet/4514254000556.jpg?_ex=240x240',affiliate:'https://a.r10.to/hPSQbO'},
+      {brand:'Shiseido',name:'Ultimune Concentrate',desc:'Strengthens skin barrier for more balanced skin over time.',tags:['Barrier','Anti-aging'],price:'¥9,680',img:'https://thumbnail.image.rakuten.co.jp/@0_mall/brandshiseido/cabinet/prd/maq/maq-ul2201.jpg?_ex=240x240',affiliate:'https://a.r10.to/hPSQsS'},
+      {brand:'Pola',name:'B.A Lotion',desc:'Most awarded lotion in Japan — perfects combination skin.',tags:['Luxury','Balancing'],price:'¥16,500',img:'https://thumbnail.image.rakuten.co.jp/@0_mall/tokyokaei666888/cabinet/07333809/10150420/imgrc0142703512.jpg?_ex=288x288',affiliate:'https://a.r10.to/hPqzvS'},
+      {brand:'Ipsa',name:'Time Reset Aqua',desc:'Cult Japanese essence that resets dull combination skin.',tags:['Reset','Aqua'],price:'¥7,150',img:'https://thumbnail.image.rakuten.co.jp/@0_mall/aena/cabinet/cabinet02/159042.jpg?_ex=240x240',affiliate:'https://a.r10.to/hFSxsU'}
+    ]
+  },
+  normal:{
+    budget:[
+      {brand:'Hada Labo',name:'Gokujyun Lotion',desc:'Classic hyaluronic toner to maintain healthy skin.',tags:['Hydrating','Daily'],price:'¥880',img:'https://thumbnail.image.rakuten.co.jp/@0_mall/at-life/cabinet/img2022/4987241127474.jpg?_ex=288x288',affiliate:'https://a.r10.to/hgGDde'},
+      {brand:'Canmake',name:'Mermaid Skin Gel UV',desc:'All-in-one SPF gel with a beautiful dewy finish.',tags:['SPF','Dewy'],price:'¥880',img:'https://thumbnail.image.rakuten.co.jp/@0_mall/0101marui/cabinet/cc007/407/784901008312132_1.jpg?_ex=288x288',affiliate:'https://a.r10.to/h5gXGn'},
+      {brand:'Cezanne',name:'UV Sun Screen',desc:'Budget-friendly Japanese SPF loved by beauty fans.',tags:['SPF','Affordable'],price:'¥600',img:'https://thumbnail.image.rakuten.co.jp/@0_mall/soukaikenbi/cabinet/064/4939553040972.jpg?_ex=288x288',affiliate:'https://a.r10.to/hPYCJR'},
+      {brand:'DHC',name:'Vitamin C Serum',desc:'Brightening vitamin C serum for maintaining even tone.',tags:['Vitamin C','Glow'],price:'¥1,540',img:'https://thumbnail.image.rakuten.co.jp/@0_mall/dhcshop/cabinet/white/8000023600.jpg?_ex=288x288',affiliate:'https://a.r10.to/h5dUP2'}
+    ],
+    mid:[
+      {brand:'FANCL',name:'Mild Cleansing Oil',desc:'Perfect daily cleanser for maintaining healthy skin.',tags:['Daily','Pure'],price:'¥1,980',img:'https://thumbnail.image.rakuten.co.jp/@0_mall/fancl-shop/cabinet/item-img/1500-1999/1843.jpg?_ex=240x240',affiliate:'https://a.r10.to/h8F7Yt'},
+      {brand:'Kose',name:'Sekkisei Lotion Rich',desc:'Herbal brightening lotion for glowing, healthy skin.',tags:['Brightening','Herbal'],price:'¥5,500',img:'https://tshop.r10s.jp/yayoi-cosme/cabinet/07142378/10340750/4971710573855.jpg?_ex=200x200&s=0&r=1',affiliate:'https://a.r10.to/hHB9rK'},
+      {brand:'Elixir',name:'Superieur Emulsion III',desc:'Richer emulsion for maintaining and enhancing normal skin.',tags:['Nourishing','Daily'],price:'¥3,850',img:'https://tshop.r10s.jp/yayoi-cosme/cabinet/08015879/11875858/imgrc0114718953.jpg?_ex=200x200&s=0&r=1',affiliate:'https://a.r10.to/hPJDga'},
+      {brand:'Anessa',name:'Perfect UV Sunscreen',desc:'Best-selling Shiseido sunscreen for everyday protection.',tags:['SPF50+','Daily'],price:'¥2,860',img:'https://tshop.r10s.jp/rakuten24/cabinet/105/4909978147105.jpg?_ex=200x200&s=0&r=1',affiliate:'https://a.r10.to/h8FmkF'}
+    ],
+    premium:[
+      {brand:'SK-II',name:'Facial Treatment Essence',desc:'The world-famous Pitera essence for perfecting skin.',tags:['Iconic','Premium'],price:'¥22,000',img:'https://thumbnail.image.rakuten.co.jp/@0_mall/kind-s-care/cabinet/4514254000556.jpg?_ex=240x240',affiliate:'https://a.r10.to/hPSQbO'},
+      {brand:'Shiseido',name:'Ultimune Concentrate',desc:'Global best-seller for radiant, defended skin.',tags:['Anti-aging','Glow'],price:'¥9,680',img:'https://thumbnail.image.rakuten.co.jp/@0_mall/brandshiseido/cabinet/prd/maq/maq-ul2201.jpg?_ex=240x240',affiliate:'https://a.r10.to/hPSQsS'},
+      {brand:'Cle de Peau',name:'La Creme',desc:'The most prestigious Shiseido cream for flawless skin.',tags:['Luxury','Luminous'],price:'¥38,500',img:'https://thumbnail.image.rakuten.co.jp/@0_mall/kind-s-care/cabinet/4514254129562.jpg?_ex=240x240',affiliate:'https://a.r10.to/h54Qbu'},
+      {brand:'Pola',name:'B.A Lotion',desc:'Most award-winning lotion in Japan for beautiful skin.',tags:['Luxury','Refined'],price:'¥16,500',img:'https://thumbnail.image.rakuten.co.jp/@0_mall/tokyokaei666888/cabinet/07333809/10150420/imgrc0142703512.jpg?_ex=288x288',affiliate:'https://a.r10.to/hPqzvS'}
+    ]
+  }
+};
+
+function getProducts(){
+  const db=PRODUCTS[ans[1]]||PRODUCTS.normal;
+  return db[ans[4]]||db.mid;
+}
+
+async function getRecommendations(){
+  if(!ans[5])return;
+  document.getElementById('progress-wrap').style.display='none';
+  showStep('loading');
+  const t=T[lang]||T.en;
+  document.getElementById('loading-text').textContent=t.loading;
+  document.getElementById('loading-sub').textContent=t.loadSub;
+  const langNames={en:'English',zh:'Chinese (Simplified)',ko:'Korean',fr:'French',es:'Spanish',th:'Thai',ar:'Arabic'};
+  const outLang=langNames[lang]||'English';
+  const products=getProducts();
+  const prompt=`You are a J-Beauty expert. Customer: skin=${ans[1]}, concern=${ans[2]}, texture=${ans[3]}, budget=${ans[4]}, shopping=${ans[5]}. Respond ONLY in ${outLang}. Return JSON only (no markdown): {"skinProfile":"2-3 word label","intro":"2 sentences","advice":"3-4 sentences of J-Beauty expert advice"}`;
+  let profile=t.profile,intro='',advice='Japanese beauty philosophy focuses on deep hydration and long-term skin health.';
+  try{
+    const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:600,messages:[{role:'user',content:prompt}]})});
+    const data=await res.json();
+    const raw=data.content.find(b=>b.type==='text')?.text||'';
+    const m=raw.match(/\{[\s\S]*\}/);
+    if(m){const r=JSON.parse(m[0]);profile=r.skinProfile||profile;intro=r.intro||intro;advice=r.advice||advice;}
+  }catch(e){}
+  document.getElementById('result-badge').textContent=t.profile+': '+profile;
+  document.getElementById('result-title').textContent=t.title;
+  document.getElementById('result-intro').textContent=intro;
+  document.getElementById('ai-response').textContent=advice;
+  document.getElementById('ai-label-text').textContent=t.aiLabel;
+  document.getElementById('ask-btn').textContent=t.askBtn;
+  document.getElementById('ask-input').placeholder=t.askPh;
+  document.getElementById('restart-btn').textContent=t.restart;
+  const grid=document.getElementById('products-grid');
+  grid.innerHTML='';
+  products.forEach(p=>{
+    const card=document.createElement('div');
+    card.className='product-card';
+    card.innerHTML=`<div class="prod-img-wrap"><img class="prod-img" src="${p.img}" alt="${p.name}" onerror="this.src='https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=400&q=80';this.onerror=null;"><div class="prod-img-placeholder" style="display:none">🌸</div></div><div class="prod-info"><div class="prod-brand">${p.brand}</div><div class="prod-name">${p.name}</div><div class="prod-desc">${p.desc}</div><div class="prod-tags">${(p.tags||[]).map(tag=>`<span class="prod-tag">${tag}</span>`).join('')}</div><div class="prod-price">${convertPrice(p.price)}</div><div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;"><a class="prod-link" href="${p.affiliate}" target="_blank" style="background:#bf0000;">🛒 Rakuten</a><a class="prod-link" href="${p.amazon||'https://www.amazon.co.jp/s?k='+encodeURIComponent(p.brand+' '+p.name)}" target="_blank" style="background:#e47911;color:#111;">📦 Amazon</a></div></div>`;
+    grid.appendChild(card);
+  });
+  showStep('results');
+}
+
+async function askQ(){
+  const input=document.getElementById('ask-input');
+  const q=input.value.trim();if(!q)return;
+  input.value='';
+  const el=document.getElementById('ai-response');
+  const btn=document.getElementById('ask-btn');
+  btn.disabled=true;el.textContent='...';
+  const langNames={en:'English',zh:'Chinese (Simplified)',ko:'Korean',fr:'French',es:'Spanish',th:'Thai',ar:'Arabic'};
+  try{
+    const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:500,messages:[{role:'user',content:`J-Beauty expert. Answer in ${langNames[lang]||'English'} only. Under 4 sentences. Question: ${q}`}]})});
+    const data=await res.json();
+    el.textContent=data.content.find(b=>b.type==='text')?.text||'Please try again.';
+  }catch(e){el.textContent='Please try again.';}
+  btn.disabled=false;
+}
+document.getElementById('ask-input').addEventListener('keydown',e=>{if(e.key==='Enter')askQ();});
+
+function restart(){
+  Object.keys(ans).forEach(k=>delete ans[k]);
+  document.querySelectorAll('.opt').forEach(o=>o.classList.remove('selected'));
+  document.querySelectorAll('.btn-next').forEach(b=>b.disabled=true);
+  document.getElementById('progress-wrap').style.display='block';
+  showStep(1);
+}
+</script>
+<script>
+(function(){
+  const canvas=document.getElementById('sakura-canvas');
+  const ctx=canvas.getContext('2d');
+  let W,H,petals=[];
+  function resize(){W=canvas.width=window.innerWidth;H=canvas.height=window.innerHeight;}
+  resize();window.addEventListener('resize',resize);
+  function drawPetal(ctx,x,y,size,angle,opacity,type){
+    ctx.save();ctx.translate(x,y);ctx.rotate(angle);ctx.globalAlpha=opacity;
+    if(type===0){
+      ctx.beginPath();
+      for(let i=0;i<5;i++){const a=(i/5)*Math.PI*2-Math.PI/2;const px=Math.cos(a)*size;const py=Math.sin(a)*size;const a2=((i+0.5)/5)*Math.PI*2-Math.PI/2;const px2=Math.cos(a2)*size*0.4;const py2=Math.sin(a2)*size*0.4;if(i===0)ctx.moveTo(px2,py2);ctx.quadraticCurveTo(px,py,px2,py2);}
+      ctx.closePath();const g=ctx.createRadialGradient(0,0,0,0,0,size);g.addColorStop(0,'rgba(255,210,220,1)');g.addColorStop(1,'rgba(220,150,170,0.6)');ctx.fillStyle=g;ctx.fill();
+    }else{ctx.beginPath();ctx.ellipse(0,0,size*0.5,size,0,0,Math.PI*2);ctx.fillStyle='rgba(255,200,215,0.7)';ctx.fill();}
+    ctx.restore();
+  }
+  function createPetal(){return{x:Math.random()*W+100,y:-20-Math.random()*100,size:6+Math.random()*14,angle:Math.random()*Math.PI*2,spin:(Math.random()-0.5)*0.06,vx:-1.5-Math.random()*2,vy:0.8+Math.random()*1.5,swing:Math.random()*0.8,swingSpeed:0.008+Math.random()*0.012,swingOffset:Math.random()*Math.PI*2,opacity:0.3+Math.random()*0.6,type:Math.floor(Math.random()*2),life:0};}
+  for(let i=0;i<35;i++){const p=createPetal();p.y=Math.random()*H;p.x=Math.random()*W;petals.push(p);}
+  function animate(){
+    ctx.clearRect(0,0,W,H);
+    if(petals.length<50&&Math.random()<0.12)petals.push(createPetal());
+    petals=petals.filter(p=>{p.life++;p.angle+=p.spin;p.x+=p.vx+Math.sin(p.life*p.swingSpeed+p.swingOffset)*p.swing;p.vy+=0.008;p.y+=p.vy;let alpha=p.opacity;if(p.life<30)alpha*=p.life/30;drawPetal(ctx,p.x,p.y,p.size,p.angle,alpha,p.type);return p.y<H+30&&p.x>-100;});
+    requestAnimationFrame(animate);
+  }
+  animate();
+})();
+</script>
+</body>
+</html>
